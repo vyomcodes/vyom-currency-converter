@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vyom Currency Converter</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {
+        font-family: 'Montserrat', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #fff;
+        overflow: hidden;
+        background: #0f0f1a;
+    }
+
+    /* Floating Currency Symbols Background */
+    .currency-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1;
+    }
+    .currency-symbol {
+        position: absolute;
+        color: rgba(255,255,255,0.1);
+        font-size: 3rem;
+        animation: float 20s linear infinite;
+    }
+    @keyframes float {
+        0% {transform: translateY(0);}
+        100% {transform: translateY(-200vh);}
+    }
+
+    /* Converter Box */
+    .converter {
+        background: rgba(25, 25, 40, 0.8);
+        backdrop-filter: blur(15px);
+        padding: 25px;
+        border-radius: 20px;
+        text-align: center;
+        width: 90%;
+        max-width: 420px;
+        box-shadow: 0 0 25px rgba(0,255,255,0.2);
+        border: 2px solid rgba(0,255,255,0.3);
+        animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0; transform: scale(0.8);}
+        to {opacity: 1; transform: scale(1);}
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #00f2fe;
+        text-shadow: 0 0 20px #00f2fe;
+        animation: slideDown 1.5s ease;
+    }
+    @keyframes slideDown {
+        from {opacity: 0; transform: translateY(-30px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+
+    input, button {
+        width: 95%;
+        padding: 12px;
+        margin: 10px 0;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation: fadeUp 1.5s ease forwards;
+    }
+    input:nth-child(1) {animation-delay: 0.5s;}
+    input:nth-child(2) {animation-delay: 0.8s;}
+    @keyframes fadeUp {
+        from {opacity: 0; transform: translateY(20px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+
+    input {
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    input::placeholder {
+        color: #ccc;
+    }
+
+    button {
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
+        color: white;
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: bold;
+        box-shadow: 0 0 10px rgba(0,242,254,0.6);
+    }
+    button:hover {
+        transform: scale(1.08);
+        box-shadow: 0 0 25px rgba(0,242,254,0.8);
+    }
+    .swap-btn {
+        background: linear-gradient(135deg, #ff6a00, #ee0979);
+    }
+    .dark-btn {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .dropdown {
+        position: relative;
+        width: 95%;
+        margin: 10px auto;
+    }
+    .dropdown input {
+        width: 100%;
+    }
+    .dropdown-list {
+        position: absolute;
+        width: 100%;
+        max-height: 150px;
+        overflow-y: auto;
+        background: rgba(30,30,40,0.95);
+        color: #fff;
+        border-radius: 8px;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+    }
+    .dropdown-list div {
+        padding: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .dropdown-list div:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .result {
+        margin-top: 15px;
+        font-size: 22px;
+        font-weight: bold;
+        color: #00f2fe;
+        text-shadow: 0 0 20px rgba(0,242,254,0.8);
+        animation: fadeIn 1.5s ease forwards;
+    }
+</style>
+</head>
+<body>
+
+<!-- Animated Currency Symbols -->
+<div class="currency-bg">
+    <div class="currency-symbol" style="left:10%; top:90%; animation-delay:0s;">₹</div>
+    <div class="currency-symbol" style="left:30%; top:100%; animation-delay:3s;">$</div>
+    <div class="currency-symbol" style="left:50%; top:95%; animation-delay:6s;">€</div>
+    <div class="currency-symbol" style="left:70%; top:98%; animation-delay:9s;">£</div>
+    <div class="currency-symbol" style="left:90%; top:102%; animation-delay:12s;">¥</div>
+</div>
+
+<div class="converter">
+    <h2>💸 Vyom Currency Converter</h2>
+    <input type="number" id="amount" placeholder="Enter amount" />
+    
+    <!-- From Currency Dropdown -->
+    <div class="dropdown">
+        <input type="text" id="fromSearch" placeholder="Search From Currency" onkeyup="filterList('from')" onclick="showList('from')">
+        <div class="dropdown-list" id="fromList"></div>
+    </div>
+    
+    <button class="swap-btn" onclick="swapCurrencies()">🔄 Swap</button>
+    
+    <!-- To Currency Dropdown -->
+    <div class="dropdown">
+        <input type="text" id="toSearch" placeholder="Search To Currency" onkeyup="filterList('to')" onclick="showList('to')">
+        <div class="dropdown-list" id="toList"></div>
+    </div>
+    
+    <button onclick="convert()">💱 Convert (Live)</button>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+const currencies = [
+    "USD - United States Dollar", "EUR - Euro", "INR - Indian Rupee", "GBP - British Pound",
+    "JPY - Japanese Yen", "AUD - Australian Dollar", "CAD - Canadian Dollar", "CHF - Swiss Franc",
+    "CNY - Chinese Yuan", "HKD - Hong Kong Dollar", "SGD - Singapore Dollar", "NZD - New Zealand Dollar"
+];
+
+let fromCurrency = "USD - United States Dollar";
+let toCurrency = "INR - Indian Rupee";
+
+function populateList() {
+    const fromList = document.getElementById('fromList');
+    const toList = document.getElementById('toList');
+    fromList.innerHTML = '';
+    toList.innerHTML = '';
+    currencies.forEach(curr => {
+        let div1 = document.createElement('div');
+        div1.textContent = curr;
+        div1.onclick = () => selectCurrency('from', curr);
+        fromList.appendChild(div1);
+        
+        let div2 = document.createElement('div');
+        div2.textContent = curr;
+        div2.onclick = () => selectCurrency('to', curr);
+        toList.appendChild(div2);
+    });
+}
+populateList();
+
+function filterList(type) {
+    let input = document.getElementById(type + 'Search').value.toLowerCase();
+    let list = document.getElementById(type + 'List').children;
+    for (let i = 0; i < list.length; i++) {
+        list[i].style.display = list[i].textContent.toLowerCase().includes(input) ? '' : 'none';
+    }
+    document.getElementById(type + 'List').style.display = 'block';
+}
+
+function showList(type) {
+    document.getElementById(type + 'List').style.display = 'block';
+}
+
+function selectCurrency(type, value) {
+    document.getElementById(type + 'Search').value = value;
+    document.getElementById(type + 'List').style.display = 'none';
+    if (type === 'from') fromCurrency = value;
+    else toCurrency = value;
+}
+
+// LIVE API Fetch
+async function convert() {
+    let amount = document.getElementById("amount").value;
+    if (amount === "" || amount <= 0) {
+        document.getElementById("result").innerText = "Please enter a valid amount.";
+        return;
+    }
+
+    let from = fromCurrency.split(" ")[0];
+    let to = toCurrency.split(" ")[0];
+
+    try {
+        let response = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`);
+        let data = await response.json();
+        let converted = data.rates[to];
+        document.getElementById("result").innerText = `${amount} ${from} = ${converted.toFixed(2)} ${to}`;
+    } catch (error) {
+        document.getElementById("result").innerText = "Error fetching live rates.";
+    }
+}
+
+function swapCurrencies() {
+    let temp = fromCurrency;
+    fromCurrency = toCurrency;
+    toCurrency = temp;
+    document.getElementById('fromSearch').value = fromCurrency;
+    document.getElementById('toSearch').value = toCurrency;
+}
+</script>
+</body>
+</html>
